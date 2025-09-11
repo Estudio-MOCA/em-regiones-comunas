@@ -9,9 +9,9 @@
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em_regiones_comunas
  * Requires Plugins: woocommerce
- * Requires PHP: 7.4
+ * Requires PHP: 8.1
  * Requires WP: 6.3
- * WC requires at least: 8.0
+ * WC requires at least: 9.0
  * WC tested up to: 8.2
  * @package Em_Regiones_Comunas
  */

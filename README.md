@@ -1,7 +1,65 @@
-# Comunas y Regiones para Woocommerce
-Crea la lista de comunas de Chile y las asocia a los métodos de envío en Woocommerce. Se puede filtrar por Región en la página del checkout.
+# Regiones y Comunas de Chile para WooCommerce
 
-Recomiendo ocupar este plugin cuando tienes reglas de despacho por Comunas, como por peso del carro, precio de la compra etc.
-Los plugins que puedes ocupar para reglas son:
-- Flexible Shipping: Para reglas por comuna por precio y peso (en el peso es más básico). 
-- WC - APG Envío por peso: Para reglas que tienen que ver con pesos (es avanzado en este aspecto).
+[![Versión](https://img.shields.io/badge/versión-25.09.04-blue.svg)](https://github.com/Estudio-MOCA/em-regiones-comunas/releases/tag/v25.09.04)
+[![Compatible con WooCommerce](https://img.shields.io/badge/WooCommerce-v9.0+-a46497.svg)](https://woocommerce.com/)
+[![Compatible con WordPress](https://img.shields.io/badge/WordPress-v6.3+-blue.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-v8.1+-777bb3.svg)](https://php.net/)
+
+## Descripción
+
+Este plugin agrega todas las regiones y comunas de Chile al checkout de WooCommerce, permitiendo una mejor experiencia para los usuarios chilenos. Incluye funcionalidades para filtrar comunas por región directamente en la página de checkout.
+
+### Características principales
+
+- Agrega todas las regiones y comunas de Chile al checkout de WooCommerce
+- Compatible con el checkout clásico y el checkout de bloques
+- Permite filtrar comunas por región
+- Traduce automáticamente las etiquetas "Región" y "Comuna" en el checkout
+- Compatible con HPOS (High-Performance Order Storage) de WooCommerce
+- Optimizado para un rendimiento rápido
+
+## Requisitos
+
+- WordPress 6.3 o superior
+- WooCommerce 9.0 o superior
+- PHP 8.1 o superior
+
+## Instalación
+
+1. Descarga el archivo zip del plugin
+2. Ve a tu panel de administración de WordPress > Plugins > Añadir nuevo
+3. Haz clic en "Subir plugin" y selecciona el archivo zip descargado
+4. Activa el plugin desde la sección de plugins
+
+## Uso
+
+Una vez activado, el plugin funcionará automáticamente en el checkout de WooCommerce. No requiere configuración adicional.
+
+### Plugins recomendados para reglas de envío
+
+Este plugin es ideal cuando necesitas configurar reglas de envío específicas por comuna, como por peso del carrito, precio de la compra, etc. Recomendamos los siguientes plugins complementarios:
+
+- **Flexible Shipping**: Para reglas por comuna basadas en precio y peso (funcionalidad básica para peso)
+- **WC - APG Envío por peso**: Para reglas avanzadas relacionadas con el peso de los productos
+
+## Compatibilidad
+
+- Compatible con el checkout clásico de WooCommerce
+- Compatible con el checkout de bloques de WooCommerce
+- Compatible con HPOS (High-Performance Order Storage)
+
+## Soporte
+
+Para soporte técnico o consultas, visita [Estudio MOCA](https://estudiomoca.cl/) o abre un issue en el [repositorio del plugin](https://github.com/Estudio-MOCA/em-regiones-comunas).
+
+## Contribuir
+
+Las contribuciones son bienvenidas. Si deseas contribuir al desarrollo de este plugin, por favor envía un pull request al [repositorio del plugin](https://github.com/Estudio-MOCA/em-regiones-comunas).
+
+## Licencia
+
+Este plugin está licenciado bajo la licencia GPL v2 o posterior.
+
+## Créditos
+
+Desarrollado por [Estudio MOCA](https://estudiomoca.cl/).

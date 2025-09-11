@@ -1,63 +1,88 @@
 <?php
 
-class Em_Regiones_Comunas_Install {
-    public $comunas_table;
-    public $regiones_table;
-    public $provincias_table;
+class Em_Regiones_Comunas_Install
+{
+  public $comunas_table;
+  public $regiones_table;
+  public $provincias_table;
 
-    public function __construct()
-    {
-        global $wpdb;
-        $this->comunas_table = $wpdb->prefix . 'em_comunas';
-        $this->regiones_table = $wpdb->prefix . 'em_regiones';
-        $this->provincias_table = $wpdb->prefix . 'em_provincias';
-    }
+  public function __construct()
+  {
+    global $wpdb;
+    $this->comunas_table = $wpdb->prefix . 'em_comunas';
+    $this->regiones_table = $wpdb->prefix . 'em_regiones';
+    $this->provincias_table = $wpdb->prefix . 'em_provincias';
+  }
 
-    public function install() {
-        $this->create_tables();
-        $this->insert_data();
-    }
+  public function install()
+  {
+    $this->create_tables();
+    $this->insert_data();
+  }
 
-    private function create_tables() {
-        global $wpdb;
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+  private function create_tables()
+  {
+    global $wpdb;
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        //Crea comunas
-        $sql = "CREATE TABLE `{$this->comunas_table}` (
+    //Crea comunas, replace table if exists
+    $wpdb->query("DROP TABLE IF EXISTS `{$this->comunas_table}`");
+    $wpdb->query("DROP TABLE IF EXISTS `{$this->provincias_table}`");
+    $wpdb->query("DROP TABLE IF EXISTS `{$this->regiones_table}`");
+
+    $sql = "CREATE TABLE IF NOT EXISTS `{$this->comunas_table}` (
         `id` int(11) AUTO_INCREMENT PRIMARY KEY,
         `comuna` varchar(64) NOT NULL,
         `provincia_id` int(11) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
-        dbDelta($sql);
+    // add index provincia_id
+    dbDelta($sql);
 
-        //Crea provincias
-        $sql = "CREATE TABLE `{$this->provincias_table}` (
+    //Crea provincias
+    $sql = "CREATE TABLE IF NOT EXISTS `{$this->provincias_table}` (
           `id` int(11) AUTO_INCREMENT PRIMARY KEY,
           `provincia` varchar(64) NOT NULL,
           `region_id` int(11) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
-        dbDelta($sql);
+    dbDelta($sql);
 
-        //Crea regiones
-        $sql = "CREATE TABLE `{$this->regiones_table}` (
+    //Crea regiones
+    $sql = "CREATE TABLE IF NOT EXISTS `{$this->regiones_table}` (
           `id` int(11) AUTO_INCREMENT PRIMARY KEY,
           `region` varchar(64) NOT NULL,
           `abreviatura` varchar(4) NOT NULL,
-          `capital` varchar(64) NOT NULL
+          `capital` varchar(64) NOT NULL,
+          `orden` int(11) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
-        dbDelta($sql);
+    // add index orden
 
-        $wpdb->query("ALTER TABLE `{$this->regiones_table}`
+    dbDelta($sql);
+
+    $wpdb->query("ALTER TABLE `{$this->regiones_table}`
             ADD KEY `region` (`region`)");
-    }
 
-    private function insert_data() {
-        global $wpdb;
+    // add indexes
+    $wpdb->query("ALTER TABLE `{$this->comunas_table}`
+            ADD KEY `comuna_provincia_id` (`provincia_id`)");
 
-        $sql = "INSERT INTO `{$this->comunas_table}` (`id`, `comuna`, `provincia_id`) VALUES
+    $wpdb->query("ALTER TABLE `{$this->provincias_table}`
+            ADD KEY `provincia_region_id` (`region_id`)");
+
+    $wpdb->query("ALTER TABLE `{$this->regiones_table}`
+            ADD KEY `region_orden` (`orden`)");
+
+    $wpdb->query("ALTER TABLE `{$this->regiones_table}`
+            ADD KEY `region_abreviatura` (`abreviatura`)");
+  }
+
+  private function insert_data()
+  {
+    global $wpdb;
+
+    $sql = "INSERT INTO `{$this->comunas_table}` (`id`, `comuna`, `provincia_id`) VALUES
             (1, 'Arica', 1),
             (2, 'Camarones', 1),
             (3, 'General Lagos', 2),
@@ -405,9 +430,9 @@ class Em_Regiones_Comunas_Install {
             (346, 'Cabo de Hornos', 56),
             (347, 'Antártica', 56)";
 
-        $wpdb->query($sql);
+    $wpdb->query($sql);
 
-        $sql = "INSERT INTO `{$this->provincias_table}` (`id`, `provincia`, `region_id`) VALUES
+    $sql = "INSERT INTO `{$this->provincias_table}` (`id`, `provincia`, `region_id`) VALUES
             (1, 'Arica', 1),
             (2, 'Parinacota', 1),
             (3, 'Iquique', 2),
@@ -465,26 +490,26 @@ class Em_Regiones_Comunas_Install {
             (55, 'Tierra del Fuego', 16),
             (56, 'Antártica Chilena', 16)";
 
-        $wpdb->query($sql);
+    $wpdb->query($sql);
 
-        $sql = "INSERT INTO `{$this->regiones_table}` (`id`, `region`, `abreviatura`, `capital`) VALUES
-            (1, 'Arica y Parinacota', 'AP', 'Arica'),
-            (2, 'Tarapacá', 'TA', 'Iquique'),
-            (3, 'Antofagasta', 'AN', 'Antofagasta'),
-            (4, 'Atacama', 'AT', 'Copiapó'),
-            (5, 'Coquimbo', 'CO', 'La Serena'),
-            (6, 'Valparaiso', 'VA', 'Valparaíso'),
-            (7, 'Metropolitana de Santiago', 'RM', 'Santiago'),
-            (8, 'Libertador General Bernardo O\'Higgins', 'OH', 'Rancagua'),
-            (9, 'Maule', 'MA', 'Talca'),
-            (10, 'Ñuble', 'NB', 'Chillán'),
-            (11, 'Biobío', 'BI', 'Concepción'),
-            (12, 'La Araucanía', 'IAR', 'Temuco'),
-            (13, 'Los Ríos', 'LR', 'Valdivia'),
-            (14, 'Los Lagos', 'LL', 'Puerto Montt'),
-            (15, 'Aysén del General Carlos Ibáñez del Campo', 'AI', 'Coyhaique'),
-            (16, 'Magallanes y de la Antártica Chilena', 'MG', 'Punta Arenas')";
+    $sql = "INSERT INTO `{$this->regiones_table}` (`id`, `region`, `abreviatura`, `capital`, `orden`) VALUES
+            (1, 'Arica y Parinacota', 'AP', 'Arica', 1),
+            (2, 'Tarapacá', 'TA', 'Iquique', 2),
+            (3, 'Antofagasta', 'AN', 'Antofagasta', 3),
+            (4, 'Atacama', 'AT', 'Copiapó', 4),
+            (5, 'Coquimbo', 'CO', 'La Serena', 5),
+            (6, 'Valparaiso', 'VA', 'Valparaíso', 6),
+            (7, 'Metropolitana de Santiago', 'RM', 'Santiago', 7),
+            (8, 'Libertador General Bernardo O\'Higgins', 'OH', 'Rancagua', 8),
+            (9, 'Maule', 'MA', 'Talca', 9),
+            (10, 'Ñuble', 'NB', 'Chillán', 10),
+            (11, 'Biobío', 'BI', 'Concepción', 11),
+            (12, 'La Araucanía', 'IAR', 'Temuco', 12),
+            (13, 'Los Ríos', 'LR', 'Valdivia', 13),
+            (14, 'Los Lagos', 'LL', 'Puerto Montt', 14),
+            (15, 'Aysén del General Carlos Ibáñez del Campo', 'AI', 'Coyhaique', 15),
+            (16, 'Magallanes y de la Antártica Chilena', 'MG', 'Punta Arenas', 16)";
 
-        $wpdb->query($sql);
-    }
+    $wpdb->query($sql);
+  }
 }

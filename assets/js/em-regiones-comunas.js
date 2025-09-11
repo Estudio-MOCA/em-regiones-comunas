@@ -1,41 +1,58 @@
 jQuery(function ($) {
-    function search_comuna(region) {
-        var comunas = [];
-        for (let i in window.comunas) {
-            var comuna = window.comunas[i];
+  function search_comuna(region) {
+    let comunas = [
+      {
+        id: 0,
+        comuna: "Seleccionar",
+      },
+    ];
+    for (let i in window.comunas) {
+      let comuna = window.comunas[i];
 
-            if (region === comuna.region) {
-                comunas.push(comuna);
-            }
-        }
-
-        return comunas;
+      if (region === comuna.region) {
+        comunas.push(comuna);
+      }
     }
 
-    var $billingCity = $('#billing_city');
-    var $comunas = $('#billing_state');
-    var $selectedComuna = $comunas.find('option:selected');
+    return comunas;
+  }
 
-    $billingCity.change(function (e) {
-        var region = this.value;
-        var comunas = search_comuna(region);
-        $comunas.html('');
+  let $billingCity = $("#billing_city");
+  let $comunas = $("#billing_state");
+  let $selectedComuna = $comunas.find("option:selected");
 
-        for (let i in comunas) {
-            var comuna = comunas[i];
+  $billingCity.change(function (e) {
+    let region = this.value;
+    let comunas = search_comuna(region);
+    $comunas.html("");
 
-            $comunas.append('<option value="' + comuna.comuna + '">' + comuna.comuna + '</option>');
-        }
-    });
+    for (let i in comunas) {
+      let comuna = comunas[i];
+      $comunas.append(
+        '<option data-region-id="' +
+          comuna.region_id +
+          '" data-region="' +
+          comuna.region +
+          '" value="' +
+          comuna.id +
+          '">' +
+          comuna.comuna +
+          "</option>"
+      );
+    }
+  });
 
-    window.setTimeout(function () {
-        $billingCity.trigger('change');
+  window.onload = function () {
+    $billingCity.trigger("change");
 
-        if ($selectedComuna.length) {
-            var selectedComuna = $selectedComuna.text();
-            $('#billing_state option').prop('selected', false);
-            $('#billing_state option[value="' + selectedComuna + '"]').prop('selected', true);
-            $comunas.trigger('change');
-        }
-    }, 500);
+    if ($selectedComuna.length) {
+      let selectedComuna = $selectedComuna.text();
+      $("#billing_state option").prop("selected", false);
+      $('#billing_state option[value="' + selectedComuna + '"]').prop(
+        "selected",
+        true
+      );
+      $comunas.trigger("change");
+    }
+  };
 });

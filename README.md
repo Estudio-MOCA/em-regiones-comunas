@@ -35,6 +35,14 @@ Este plugin agrega todas las regiones y comunas de Chile al checkout de WooComme
 
 Una vez activado, el plugin funcionará automáticamente en el checkout de WooCommerce. No requiere configuración adicional.
 
+### Dropdowns en el checkout
+
+El plugin reemplaza los campos de texto estándar por menús desplegables (dropdowns) tanto para la región (city) como para la comuna (state) en el checkout de WooCommerce:
+
+![Dropdowns de Región y Comuna en el checkout](/assets/images/checkout-dropdowns.png)
+
+Esto permite a los usuarios seleccionar fácilmente su región y luego filtrar las comunas correspondientes a esa región, mejorando significativamente la experiencia de usuario durante el proceso de compra.
+
 ### Plugins recomendados para reglas de envío
 
 Este plugin es ideal cuando necesitas configurar reglas de envío específicas por comuna, como por peso del carrito, precio de la compra, etc. Recomendamos los siguientes plugins complementarios:
@@ -62,4 +70,4 @@ Este plugin está licenciado bajo la licencia GPL v2 o posterior.
 
 ## Créditos
 
-Desarrollado por [Estudio MOCA](https://estudiomoca.cl/).
+Desarrollado por Álvaro León [Estudio MOCA](https://estudiomoca.cl/).

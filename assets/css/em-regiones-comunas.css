@@ -1,0 +1,18 @@
+.wc-block-components-address-form__city {
+  margin: 0 !important;
+}
+
+.wc-block-components-address-form__city label {
+  color: #2b2d2f !important;
+  font-family: inherit !important;
+  font-size: 1em !important;
+  font-style: inherit !important;
+  font-weight: inherit !important;
+  left: 0.5em !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
+  top: 2px !important;
+  transform: translateY(15%) scale(0.75) !important;
+  transform-origin: top left !important;
+  transition: all 0.2s ease !important;
+}

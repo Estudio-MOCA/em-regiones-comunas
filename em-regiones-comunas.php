@@ -2,9 +2,9 @@
 
 /**
  * Plugin Name: Regiones y Comunas de Chile
- * Plugin URI: https://estudiomoca.cl/
+ * Plugin URI: https://github.com/Estudio-MOCA/em-regiones-comunas
  * Description: Comunas y regiones para WooCommerce
- * Version: 2.0.2
+ * Version: 2.0.3
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas

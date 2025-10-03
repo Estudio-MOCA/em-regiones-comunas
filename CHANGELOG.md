@@ -5,6 +5,12 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2025-10-03
+
+### Corregido
+
+- Plugin URI ahora apunta al repositorio de GitHub en lugar de duplicar el Author URI.
+
 ## [2.0.2] - 2025-10-03
 
 ### Corregido

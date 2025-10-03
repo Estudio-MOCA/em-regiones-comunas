@@ -4,7 +4,7 @@
 **Tags:** woocommerce, chile, regiones, comunas, checkout
 **Requires at least:** 6.3
 **Tested up to:** 6.8
-**Stable tag:** 2.0.0
+**Stable tag:** 2.0.3
 **Requires PHP:** 8.1
 **License:** GPL v2 or later
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)

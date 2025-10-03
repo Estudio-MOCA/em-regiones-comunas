@@ -26,9 +26,12 @@ class Em_Regiones_Comunas_Install
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
     //Crea comunas, replace table if exists
-    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS `%i`", $this->comunas_table));
-    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS `%i`", $this->provincias_table));
-    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS `%i`", $this->regiones_table));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("DROP TABLE IF EXISTS `{$this->comunas_table}`");
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("DROP TABLE IF EXISTS `{$this->provincias_table}`");
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("DROP TABLE IF EXISTS `{$this->regiones_table}`");
 
     $sql = "CREATE TABLE IF NOT EXISTS `{$this->comunas_table}` (
         `id` int(11) AUTO_INCREMENT PRIMARY KEY,
@@ -61,21 +64,26 @@ class Em_Regiones_Comunas_Install
 
     dbDelta($sql);
 
-    $wpdb->query($wpdb->prepare("ALTER TABLE `%i`
-            ADD KEY `region` (`region`)", $this->regiones_table));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("ALTER TABLE `{$this->regiones_table}`
+            ADD KEY `region` (`region`)");
 
     // add indexes
-    $wpdb->query($wpdb->prepare("ALTER TABLE `%i`
-            ADD KEY `comuna_provincia_id` (`provincia_id`)", $this->comunas_table));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("ALTER TABLE `{$this->comunas_table}`
+            ADD KEY `comuna_provincia_id` (`provincia_id`)");
 
-    $wpdb->query($wpdb->prepare("ALTER TABLE `%i`
-            ADD KEY `provincia_region_id` (`region_id`)", $this->provincias_table));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("ALTER TABLE `{$this->provincias_table}`
+            ADD KEY `provincia_region_id` (`region_id`)");
 
-    $wpdb->query($wpdb->prepare("ALTER TABLE `%i`
-            ADD KEY `region_orden` (`orden`)", $this->regiones_table));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("ALTER TABLE `{$this->regiones_table}`
+            ADD KEY `region_orden` (`orden`)");
 
-    $wpdb->query($wpdb->prepare("ALTER TABLE `%i`
-            ADD KEY `region_abreviatura` (`abreviatura`)", $this->regiones_table));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query("ALTER TABLE `{$this->regiones_table}`
+            ADD KEY `region_abreviatura` (`abreviatura`)");
   }
 
   private function insert_data()
@@ -430,7 +438,8 @@ class Em_Regiones_Comunas_Install
             (346, 'Cabo de Hornos', 56),
             (347, 'Antártica', 56)";
 
-    $wpdb->query($wpdb->prepare("INSERT INTO `%i` (`id`, `comuna`, `provincia_id`) VALUES %s", $this->comunas_table, str_replace('INSERT INTO `{$this->comunas_table}` (`id`, `comuna`, `provincia_id`) VALUES', '', $sql)));
+    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($sql);
 
     $sql = "INSERT INTO `{$this->provincias_table}` (`id`, `provincia`, `region_id`) VALUES
             (1, 'Arica', 1),
@@ -490,7 +499,8 @@ class Em_Regiones_Comunas_Install
             (55, 'Tierra del Fuego', 16),
             (56, 'Antártica Chilena', 16)";
 
-    $wpdb->query($wpdb->prepare("INSERT INTO `%i` (`id`, `provincia`, `region_id`) VALUES %s", $this->provincias_table, str_replace('INSERT INTO `{$this->provincias_table}` (`id`, `provincia`, `region_id`) VALUES', '', $sql)));
+    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($sql);
 
     $sql = "INSERT INTO `{$this->regiones_table}` (`id`, `region`, `abreviatura`, `capital`, `orden`) VALUES
             (1, 'Arica y Parinacota', 'AP', 'Arica', 1),
@@ -510,6 +520,7 @@ class Em_Regiones_Comunas_Install
             (15, 'Aysén del General Carlos Ibáñez del Campo', 'AI', 'Coyhaique', 15),
             (16, 'Magallanes y de la Antártica Chilena', 'MG', 'Punta Arenas', 16)";
 
-    $wpdb->query($wpdb->prepare("INSERT INTO `%i` (`id`, `region`, `abreviatura`, `capital`, `orden`) VALUES %s", $this->regiones_table, str_replace('INSERT INTO `{$this->regiones_table}` (`id`, `region`, `abreviatura`, `capital`, `orden`) VALUES', '', $sql)));
+    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($sql);
   }
 }

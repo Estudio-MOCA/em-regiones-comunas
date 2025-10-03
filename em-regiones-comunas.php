@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name: Regiones y Comunas de Chile
+ * Plugin Name: Regiones y Comunas de Chile para WooCommerce
  * Plugin URI: https://estudiomoca.cl/
- * Description: Comunas y regiones para Woocommerce
- * Version: 2.0.0
+ * Description: Comunas y regiones para WooCommerce
+ * Version: 2.0.1
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas
@@ -50,7 +50,23 @@ class Em_Regiones_Comunas
     add_action('wp_enqueue_scripts', [$this, 'scripts_css']);
     add_action('wp_head', [$this, 'wp_head']);
     add_action('init', [$this, 'action_init'], 30);
-    register_activation_hook(__FILE__, [$this->installer, 'install']);
+    register_activation_hook(__FILE__, [$this, 'on_activation']);
+  }
+
+  public function on_activation()
+  {
+    // Instalar tablas
+    $this->installer->install();
+
+    // Limpiar caché al activar
+    $this->clear_cache();
+  }
+
+  public function clear_cache()
+  {
+    // Limpiar caché de regiones y comunas
+    wp_cache_delete('em_regiones_all', 'em_regiones_comunas');
+    wp_cache_delete('em_comunas_all', 'em_regiones_comunas');
   }
 
   public function action_init()
@@ -115,8 +131,8 @@ class Em_Regiones_Comunas
       $regiones_json = json_encode($this->get_regiones());
       $comunas_json = json_encode($comunas);
       echo '<script>
-            window.comunas = ' . wp_json_encode( wp_unslash( json_decode($comunas_json) ) ) . '; 
-            window.regiones = ' . wp_json_encode( wp_unslash( json_decode($regiones_json) ) ) . '; 
+            window.comunas = ' . wp_json_encode(wp_unslash(json_decode($comunas_json))) . '; 
+            window.regiones = ' . wp_json_encode(wp_unslash(json_decode($regiones_json))) . '; 
             </script>';
     }
   }
@@ -138,22 +154,48 @@ class Em_Regiones_Comunas
       return $this->comunas;
     }
 
-    if ($region_name) {
-      $sql = $wpdb->prepare(
-        "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM {$this->installer->comunas_table} AS co
-        INNER JOIN {$this->installer->provincias_table} AS p ON co.provincia_id=p.id 
-        INNER JOIN {$this->installer->regiones_table} AS r ON p.region_id=r.id 
-        WHERE 1=1 AND r.region=%s ORDER BY co.comuna",
-        $region_name
-      );
-    } else {
-      $sql = "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM {$this->installer->comunas_table} AS co
-        INNER JOIN {$this->installer->provincias_table} AS p ON co.provincia_id=p.id 
-        INNER JOIN {$this->installer->regiones_table} AS r ON p.region_id=r.id 
-        WHERE 1=1 ORDER BY co.comuna";
+    // Generar clave de caché única
+    $cache_key = $region_name ? 'em_comunas_' . md5($region_name) : 'em_comunas_all';
+    $cache_group = 'em_regiones_comunas';
+
+    // Intentar obtener del caché
+    $results = wp_cache_get($cache_key, $cache_group);
+
+    if (false === $results) {
+      // No está en caché, consultar la base de datos
+      // Escapar nombres de tablas para seguridad
+      $comunas_table = esc_sql($this->installer->comunas_table);
+      $provincias_table = esc_sql($this->installer->provincias_table);
+      $regiones_table = esc_sql($this->installer->regiones_table);
+
+      if ($region_name) {
+        $results = $wpdb->get_results($wpdb->prepare(
+          "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM %s AS co
+          INNER JOIN %s AS p ON co.provincia_id=p.id 
+          INNER JOIN %s AS r ON p.region_id=r.id 
+          WHERE 1=1 AND r.region=%s ORDER BY co.comuna",
+          $comunas_table,
+          $provincias_table,
+          $regiones_table,
+          $region_name
+        ));
+      } else {
+        $results = $wpdb->get_results($wpdb->prepare(
+          "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM %s AS co
+          INNER JOIN %s AS p ON co.provincia_id=p.id 
+          INNER JOIN %s AS r ON p.region_id=r.id 
+          WHERE 1=1 ORDER BY co.comuna",
+          $comunas_table,
+          $provincias_table,
+          $regiones_table
+        ));
+      }
+
+      // Guardar en caché por 1 hora (3600 segundos)
+      wp_cache_set($cache_key, $results, $cache_group, 3600);
     }
 
-    $this->comunas = $results = $wpdb->get_results($sql);
+    $this->comunas = $results;
     return $results;
   }
 
@@ -206,10 +248,22 @@ class Em_Regiones_Comunas
   public function get_regiones()
   {
     global $wpdb;
-    $sql = $wpdb->prepare(
-      "SELECT * FROM {$this->installer->regiones_table} ORDER BY orden ASC"
-    );
-    return $wpdb->get_results($sql);
+
+    // Intentar obtener del caché
+    $cache_key = 'em_regiones_all';
+    $cache_group = 'em_regiones_comunas';
+    $results = wp_cache_get($cache_key, $cache_group);
+
+    if (false === $results) {
+      // No está en caché, consultar la base de datos
+      // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+      $results = $wpdb->get_results("SELECT * FROM {$this->installer->regiones_table} ORDER BY orden ASC");
+
+      // Guardar en caché por 1 hora (3600 segundos)
+      wp_cache_set($cache_key, $results, $cache_group, 3600);
+    }
+
+    return $results;
   }
 }
 

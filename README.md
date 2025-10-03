@@ -1,14 +1,15 @@
-# Regiones y Comunas de Chile
+# Regiones y Comunas de Chile para WooCommerce
 
-[![Versión](https://img.shields.io/badge/versión-25.09.04-blue.svg)](https://github.com/Estudio-MOCA/em-regiones-comunas/releases/tag/v25.09.04)
-[![Compatible con WooCommerce](https://img.shields.io/badge/WooCommerce-v9.0+-a46497.svg)](https://woocommerce.com/)
-[![Compatible con WordPress](https://img.shields.io/badge/WordPress-v6.3+-blue.svg)](https://wordpress.org/)
-[![PHP](https://img.shields.io/badge/PHP-v8.1+-777bb3.svg)](https://php.net/)
-
-**Tested up to:** 6.5
-**Stable tag:** 25.09.04
+**Contributors:** alvaromoca
+**Tags:** woocommerce, chile, regiones, comunas, checkout
+**Requires at least:** 6.3
+**Tested up to:** 6.8
+**Stable tag:** 2.0.0
+**Requires PHP:** 8.1
 **License:** GPL v2 or later
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
+
+Agrega todas las regiones y comunas de Chile al checkout de WooCommerce con dropdowns dinámicos.
 
 ## Descripción
 

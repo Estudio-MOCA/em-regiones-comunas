@@ -1,9 +1,14 @@
-# Regiones y Comunas de Chile para WooCommerce
+# Regiones y Comunas de Chile
 
 [![Versión](https://img.shields.io/badge/versión-25.09.04-blue.svg)](https://github.com/Estudio-MOCA/em-regiones-comunas/releases/tag/v25.09.04)
 [![Compatible con WooCommerce](https://img.shields.io/badge/WooCommerce-v9.0+-a46497.svg)](https://woocommerce.com/)
 [![Compatible con WordPress](https://img.shields.io/badge/WordPress-v6.3+-blue.svg)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-v8.1+-777bb3.svg)](https://php.net/)
+
+**Tested up to:** 6.5
+**Stable tag:** 25.09.04
+**License:** GPL v2 or later
+**License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ## Descripción
 

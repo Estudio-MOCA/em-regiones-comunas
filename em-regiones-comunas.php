@@ -7,7 +7,10 @@
  * Version: 25.09.04
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
- * Text Domain: em_regiones_comunas
+ * Text Domain: em-regiones-comunas
+ * Domain Path: /languages
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Requires Plugins: woocommerce
  * Requires PHP: 8.1
  * Requires WP: 6.3
@@ -112,8 +115,8 @@ class Em_Regiones_Comunas
       $regiones_json = json_encode($this->get_regiones());
       $comunas_json = json_encode($comunas);
       echo '<script>
-            window.comunas = ' . $comunas_json . '; 
-            window.regiones = ' . $regiones_json . '; 
+            window.comunas = ' . wp_json_encode( wp_unslash( json_decode($comunas_json) ) ) . '; 
+            window.regiones = ' . wp_json_encode( wp_unslash( json_decode($regiones_json) ) ) . '; 
             </script>';
     }
   }
@@ -121,10 +124,10 @@ class Em_Regiones_Comunas
   public function scripts()
   {
     // Script para el checkout clásico
-    wp_enqueue_script('em_regiones_comunas', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas.js', ['jquery'], "1.0", true);
+    wp_enqueue_script('em-regiones-comunas', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas.js', ['jquery'], "1.0", true);
 
     // Script para el checkout de bloques
-    wp_enqueue_script('em_regiones_comunas_blocks', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas-blocks.js', ['wc-blocks-checkout'], "1.0", true);
+    wp_enqueue_script('em-regiones-comunas-blocks', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas-blocks.js', ['wc-blocks-checkout'], "1.0", true);
   }
 
   public function get_comunas($region_name = null)
@@ -135,16 +138,20 @@ class Em_Regiones_Comunas
       return $this->comunas;
     }
 
-    $st_where = '';
-
     if ($region_name) {
-      $st_where = " AND r.region='{$region_name}' ";
+      $sql = $wpdb->prepare(
+        "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM {$this->installer->comunas_table} AS co
+        INNER JOIN {$this->installer->provincias_table} AS p ON co.provincia_id=p.id 
+        INNER JOIN {$this->installer->regiones_table} AS r ON p.region_id=r.id 
+        WHERE 1=1 AND r.region=%s ORDER BY co.comuna",
+        $region_name
+      );
+    } else {
+      $sql = "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM {$this->installer->comunas_table} AS co
+        INNER JOIN {$this->installer->provincias_table} AS p ON co.provincia_id=p.id 
+        INNER JOIN {$this->installer->regiones_table} AS r ON p.region_id=r.id 
+        WHERE 1=1 ORDER BY co.comuna";
     }
-
-    $sql = "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM {$this->installer->comunas_table} AS co
-                    INNER JOIN {$this->installer->provincias_table} AS p ON co.provincia_id=p.id 
-                    INNER JOIN {$this->installer->regiones_table} AS r ON p.region_id=r.id 
-                    WHERE 1=1 {$st_where} ORDER BY co.comuna";
 
     $this->comunas = $results = $wpdb->get_results($sql);
     return $results;
@@ -199,7 +206,10 @@ class Em_Regiones_Comunas
   public function get_regiones()
   {
     global $wpdb;
-    return $wpdb->get_results("SELECT * FROM {$this->installer->regiones_table} ORDER BY orden ASC");
+    $sql = $wpdb->prepare(
+      "SELECT * FROM {$this->installer->regiones_table} ORDER BY orden ASC"
+    );
+    return $wpdb->get_results($sql);
   }
 }
 

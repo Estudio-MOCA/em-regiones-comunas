@@ -5,6 +5,12 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2025-10-03
+
+### Corregido
+
+- Corregido el nombre del plugin en la cabecera del plugin.
+
 ## [2.0.1] - 2025-10-03
 
 ### Añadido

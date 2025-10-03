@@ -1,4 +1,4 @@
-# Regiones y Comunas de Chile para WooCommerce
+# Regiones y Comunas de Chile
 
 **Contributors:** alvaromoca
 **Tags:** woocommerce, chile, regiones, comunas, checkout

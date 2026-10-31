@@ -22,7 +22,7 @@
  * "city". Sin esto su label hereda el estilo flotante del campo de texto
  * (tamaño, posición y transform) y se superpone con el valor del select.
  */
-.wc-block-components-address-form__city .wc-blocks-components-select .wc-blocks-components-select__label {
+.wc-block-components-text-input.wc-block-components-address-form__city .wc-blocks-components-select .wc-blocks-components-select__label {
   top: 6px;
   left: 10px;
   font-size: 13px;

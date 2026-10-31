@@ -4,7 +4,7 @@
  * Plugin Name: Regiones y Comunas de Chile
  * Plugin URI: https://github.com/Estudio-MOCA/em-regiones-comunas
  * Description: Comunas y regiones para WooCommerce
- * Version: 2.0.3
+ * Version: 2.1.0
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas
@@ -78,9 +78,16 @@ class Em_Regiones_Comunas
     add_filter('gettext', [$this, 'gettext'], 10, 3);
   }
 
+  // Versión del asset según su fecha de modificación, para que el navegador no use una copia vieja
+  private function asset_version($path)
+  {
+    $file = plugin_dir_path(__FILE__) . $path;
+    return file_exists($file) ? (string) filemtime($file) : '2.1.0';
+  }
+
   public function scripts_css()
   {
-    wp_enqueue_style('em-regiones-comunas', plugins_url('assets/css/em-regiones-comunas.css', __FILE__), [], "1.0");
+    wp_enqueue_style('em-regiones-comunas', plugins_url('assets/css/em-regiones-comunas.css', __FILE__), [], $this->asset_version('assets/css/em-regiones-comunas.css'));
   }
 
   public function gettext($translation, $text, $domain)
@@ -107,7 +114,7 @@ class Em_Regiones_Comunas
       'em-fix-comuna-i18n',
       plugins_url('assets/js/fix-comuna-i18n.js', __FILE__),
       ['wp-i18n', 'wc-blocks-checkout'], // asegura cargar luego
-      '1.0.0',
+      $this->asset_version('assets/js/fix-comuna-i18n.js'),
       true
     );
     wp_enqueue_script('em-fix-comuna-i18n');
@@ -153,10 +160,10 @@ class Em_Regiones_Comunas
   public function scripts()
   {
     // Script para el checkout clásico
-    wp_enqueue_script('em-regiones-comunas', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas.js', ['jquery'], "1.0", true);
+    wp_enqueue_script('em-regiones-comunas', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas.js', ['jquery'], $this->asset_version('assets/js/em-regiones-comunas.js'), true);
 
     // Script para el checkout de bloques
-    wp_enqueue_script('em-regiones-comunas-blocks', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas-blocks.js', ['wc-blocks-checkout'], "1.0", true);
+    wp_enqueue_script('em-regiones-comunas-blocks', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas-blocks.js', ['wc-blocks-checkout'], $this->asset_version('assets/js/em-regiones-comunas-blocks.js'), true);
   }
 
   public function get_comunas($region_name = null)

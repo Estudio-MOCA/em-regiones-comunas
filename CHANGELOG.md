@@ -5,6 +5,24 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-10-31
+
+### Añadido
+
+- Las comunas se listan en orden alfabético; en la Región Metropolitana, Santiago, Las Condes y Providencia van primero.
+- La Región Metropolitana aparece primera en el selector de regiones.
+- El campo de país muestra "País" en lugar de "País/Región".
+
+### Mejorado
+
+- Los scripts y estilos se versionan por fecha de modificación, así el navegador no sirve copias antiguas tras actualizar el plugin.
+
+### Corregido
+
+- Las comunas no aparecían en el selector: las consultas pasaban los nombres de tabla a `$wpdb->prepare()` con `%s` en vez de `%i`, lo que generaba SQL inválido.
+- Variable `$options` sin inicializar en `custom_woocommerce_states()`.
+- La etiqueta "Región" del checkout de bloques colapsaba, se superponía al valor y se encogía al elegir una región.
+
 ## [2.0.3] - 2025-10-03
 
 ### Corregido

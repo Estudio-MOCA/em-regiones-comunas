@@ -170,9 +170,9 @@ class Em_Regiones_Comunas
 
       if ($region_name) {
         $results = $wpdb->get_results($wpdb->prepare(
-          "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM %s AS co
-          INNER JOIN %s AS p ON co.provincia_id=p.id 
-          INNER JOIN %s AS r ON p.region_id=r.id 
+          "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM %i AS co
+          INNER JOIN %i AS p ON co.provincia_id=p.id
+          INNER JOIN %i AS r ON p.region_id=r.id
           WHERE 1=1 AND r.region=%s ORDER BY co.comuna",
           $comunas_table,
           $provincias_table,
@@ -181,9 +181,9 @@ class Em_Regiones_Comunas
         ));
       } else {
         $results = $wpdb->get_results($wpdb->prepare(
-          "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM %s AS co
-          INNER JOIN %s AS p ON co.provincia_id=p.id 
-          INNER JOIN %s AS r ON p.region_id=r.id 
+          "SELECT co.id, co.comuna, p.provincia, p.region_id, r.region FROM %i AS co
+          INNER JOIN %i AS p ON co.provincia_id=p.id
+          INNER JOIN %i AS r ON p.region_id=r.id
           WHERE 1=1 ORDER BY co.comuna",
           $comunas_table,
           $provincias_table,
@@ -235,6 +235,7 @@ class Em_Regiones_Comunas
 
   public function custom_woocommerce_states($states)
   {
+    $options = [];
     $data = $this->get_comunas();
     //$options[0] = 'Seleccionar';
 

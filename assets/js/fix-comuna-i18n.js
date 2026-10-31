@@ -8,6 +8,8 @@
     {
       "Select a state": ["Seleccionar una comuna"],
       "Select a city": ["Seleccionar una región"],
+      "Country/Region": ["País"],
+      "Select a country/region": ["Seleccionar un país"],
     },
     "woocommerce"
   );

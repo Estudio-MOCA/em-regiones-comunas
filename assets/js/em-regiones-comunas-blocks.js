@@ -143,6 +143,9 @@
       // Marcar como procesado
       stateInput.dataset.processed = "true";
 
+      // Orden de las comunas según window.comunas (WooCommerce las entrega por id)
+      sortComunaOptions(stateInput);
+
       // Aseguramos data attributes (region) en las opciones antes de disparar filtros
       updateCityInputData(stateInput);
 
@@ -239,6 +242,25 @@
   function getComuna(id) {
     const comunas = getComunas();
     return comunas.find((c) => Number(c.id) == Number(id));
+  }
+
+  // Reordena las opciones del select de comunas siguiendo el orden de window.comunas
+  function sortComunaOptions(stateInput) {
+    const order = new Map(getComunas().map((c, i) => [String(c.id), i]));
+    const rank = (option) =>
+      option.value === ""
+        ? -1
+        : order.has(option.value)
+        ? order.get(option.value)
+        : Infinity;
+    const options = Array.from(stateInput.options);
+    const sorted = options.slice().sort((a, b) => rank(a) - rank(b));
+    if (sorted.every((option, i) => option === options[i])) {
+      return;
+    }
+    const value = stateInput.value;
+    sorted.forEach((option) => stateInput.appendChild(option));
+    stateInput.value = value;
   }
 
   function updateCityInputData(stateInput) {

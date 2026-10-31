@@ -32,6 +32,10 @@ add_action('before_woocommerce_init', function () {
 });
 class Em_Regiones_Comunas
 {
+  // Región que se lista primero y comunas que abren su lista; el resto va en orden alfabético
+  private const REGION_PRIORITARIA = 'Metropolitana de Santiago';
+  private const COMUNAS_PRIORITARIAS = ['Santiago', 'Las Condes', 'Providencia'];
+
   private $comunas;
   private $installer;
 
@@ -83,6 +87,15 @@ class Em_Regiones_Comunas
   {
     if ($translation === 'Select a state') {
       return 'Seleccionar una comuna';
+    }
+    if ($domain === 'woocommerce') {
+      switch ($text) {
+        case 'Country/Region':
+        case 'Country / Region':
+          return 'País';
+        case 'Select a country/region':
+          return 'Seleccionar un país';
+      }
     }
     return $translation;
   }
@@ -195,8 +208,40 @@ class Em_Regiones_Comunas
       wp_cache_set($cache_key, $results, $cache_group, 3600);
     }
 
-    $this->comunas = $results;
-    return $results;
+    $this->comunas = $this->sort_comunas($results);
+    return $this->comunas;
+  }
+
+  /**
+   * Agrupa las comunas por región (en el orden de get_regiones) y deja primero
+   * las prioritarias de la región prioritaria. El resto conserva el orden
+   * alfabético de la consulta (usort es estable desde PHP 8).
+   */
+  private function sort_comunas($comunas)
+  {
+    if (!is_array($comunas)) {
+      return $comunas;
+    }
+
+    $posiciones = [];
+    foreach ($this->get_regiones() as $i => $region) {
+      $posiciones[$region->region] = $i;
+    }
+
+    $rango = function ($comuna) {
+      if ($comuna->region !== self::REGION_PRIORITARIA) {
+        return 0;
+      }
+      $i = array_search($comuna->comuna, self::COMUNAS_PRIORITARIAS, true);
+      return $i === false ? count(self::COMUNAS_PRIORITARIAS) : $i;
+    };
+
+    usort($comunas, function ($a, $b) use ($posiciones, $rango) {
+      return [$posiciones[$a->region] ?? PHP_INT_MAX, $rango($a)]
+        <=> [$posiciones[$b->region] ?? PHP_INT_MAX, $rango($b)];
+    });
+
+    return $comunas;
   }
 
   public function woocommerce_checkout_fields($fields)
@@ -262,6 +307,13 @@ class Em_Regiones_Comunas
 
       // Guardar en caché por 1 hora (3600 segundos)
       wp_cache_set($cache_key, $results, $cache_group, 3600);
+    }
+
+    if (is_array($results)) {
+      // Región prioritaria primero; el resto sigue el orden de la tabla
+      usort($results, function ($a, $b) {
+        return ($b->region === self::REGION_PRIORITARIA) <=> ($a->region === self::REGION_PRIORITARIA);
+      });
     }
 
     return $results;

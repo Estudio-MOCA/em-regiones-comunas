@@ -2,7 +2,7 @@
   margin: 0 !important;
 }
 
-.wc-block-components-address-form__city label {
+.wc-block-components-address-form__city label:not(.wc-blocks-components-select__label) {
   color: #2b2d2f !important;
   font-family: inherit !important;
   font-size: 1em !important;
@@ -15,4 +15,18 @@
   transform: translateY(15%) scale(0.75) !important;
   transform-origin: top left !important;
   transition: all 0.2s ease !important;
+}
+
+/*
+ * La región se pinta como un select dentro del contenedor del campo de texto
+ * "city". Sin esto su label hereda el estilo flotante del campo de texto
+ * (tamaño, posición y transform) y se superpone con el valor del select.
+ */
+.wc-block-components-address-form__city .wc-blocks-components-select .wc-blocks-components-select__label {
+  top: 6px;
+  left: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  transform: none;
+  transition: none;
 }

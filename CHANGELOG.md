@@ -5,6 +5,12 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-11-07
+
+### Corregido
+
+- Los scripts y estilos se cargan solo en el carro, el checkout y Mi cuenta. Antes iban en todas las páginas y, con el checkout de bloques, arrastraban los nonces de `wp-api-fetch` y `wc-blocks-middleware` al HTML, lo que rompía la caché de página completa.
+
 ## [2.1.0] - 2026-10-31
 
 ### Añadido

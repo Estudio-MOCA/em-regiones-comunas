@@ -4,7 +4,7 @@
  * Plugin Name: Regiones y Comunas de Chile
  * Plugin URI: https://github.com/Estudio-MOCA/em-regiones-comunas
  * Description: Comunas y regiones para WooCommerce
- * Version: 2.1.0
+ * Version: 2.1.1
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas
@@ -82,11 +82,22 @@ class Em_Regiones_Comunas
   private function asset_version($path)
   {
     $file = plugin_dir_path(__FILE__) . $path;
-    return file_exists($file) ? (string) filemtime($file) : '2.1.0';
+    return file_exists($file) ? (string) filemtime($file) : '2.1.1';
+  }
+
+  // Páginas con formularios de dirección. En las demás (home, tienda, producto) no se carga nada:
+  // los scripts del checkout de bloques arrastran wp-api-fetch y wc-blocks-middleware, que imprimen
+  // nonces en el HTML y rompen la caché de página completa.
+  private function is_address_page()
+  {
+    return is_cart() || is_checkout() || is_account_page();
   }
 
   public function scripts_css()
   {
+    if (!$this->is_address_page()) {
+      return;
+    }
     wp_enqueue_style('em-regiones-comunas', plugins_url('assets/css/em-regiones-comunas.css', __FILE__), [], $this->asset_version('assets/css/em-regiones-comunas.css'));
   }
 
@@ -109,7 +120,10 @@ class Em_Regiones_Comunas
 
   public function scripts_i18n()
   {
-    //if (!is_checkout()) return;
+    // Solo el carro y el checkout de bloques tienen el campo de comuna de WooCommerce Blocks.
+    if (!is_cart() && !is_checkout()) {
+      return;
+    }
     wp_register_script(
       'em-fix-comuna-i18n',
       plugins_url('assets/js/fix-comuna-i18n.js', __FILE__),
@@ -159,10 +173,17 @@ class Em_Regiones_Comunas
 
   public function scripts()
   {
-    // Script para el checkout clásico
+    if (!$this->is_address_page()) {
+      return;
+    }
+
+    // Script para los formularios clásicos (direcciones de Mi cuenta)
     wp_enqueue_script('em-regiones-comunas', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas.js', ['jquery'], $this->asset_version('assets/js/em-regiones-comunas.js'), true);
 
-    // Script para el checkout de bloques
+    // Script para el carro y el checkout de bloques
+    if (!is_cart() && !is_checkout()) {
+      return;
+    }
     wp_enqueue_script('em-regiones-comunas-blocks', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas-blocks.js', ['wc-blocks-checkout'], $this->asset_version('assets/js/em-regiones-comunas-blocks.js'), true);
   }
 

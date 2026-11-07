@@ -4,7 +4,7 @@
  * Plugin Name: Regiones y Comunas de Chile
  * Plugin URI: https://github.com/Estudio-MOCA/em-regiones-comunas
  * Description: Comunas y regiones para WooCommerce
- * Version: 2.1.1
+ * Version: 2.2.0
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas
@@ -53,6 +53,8 @@ class Em_Regiones_Comunas
 
     add_action('wp_enqueue_scripts', [$this, 'scripts_css']);
     add_action('wp_head', [$this, 'wp_head']);
+    add_filter('woocommerce_customer_meta_fields', [$this, 'customer_meta_fields'], 20);
+    add_action('admin_enqueue_scripts', [$this, 'admin_scripts']);
     add_action('init', [$this, 'action_init'], 30);
     register_activation_hook(__FILE__, [$this, 'on_activation']);
   }
@@ -82,7 +84,7 @@ class Em_Regiones_Comunas
   private function asset_version($path)
   {
     $file = plugin_dir_path(__FILE__) . $path;
-    return file_exists($file) ? (string) filemtime($file) : '2.1.1';
+    return file_exists($file) ? (string) filemtime($file) : '2.2.0';
   }
 
   // Páginas con formularios de dirección. En las demás (home, tienda, producto) no se carga nada:
@@ -185,6 +187,80 @@ class Em_Regiones_Comunas
       return;
     }
     wp_enqueue_script('em-regiones-comunas-blocks', plugin_dir_url(__FILE__) . 'assets/js/em-regiones-comunas-blocks.js', ['wc-blocks-checkout'], $this->asset_version('assets/js/em-regiones-comunas-blocks.js'), true);
+  }
+
+  /**
+   * Perfil de usuario en wp-admin: la Región (`*_city`) es un selector y la
+   * Comuna (`*_state`) va justo después, junto al País. `admin_scripts` deja en
+   * la Comuna solo las comunas de la región elegida.
+   */
+  public function customer_meta_fields($fields)
+  {
+    $regiones = ['' => __('Seleccionar región', 'em-regiones-comunas')];
+    foreach ($this->get_regiones() ?: [] as $region) {
+      $regiones[$region->region] = $region->region;
+    }
+
+    foreach (['billing', 'shipping'] as $type) {
+      if (!isset($fields[$type]['fields']["{$type}_city"], $fields[$type]['fields']["{$type}_state"])) {
+        continue;
+      }
+      $address = $fields[$type]['fields'];
+
+      $address["{$type}_city"] = array_merge($address["{$type}_city"], [
+        'label' => __('Región', 'em-regiones-comunas'),
+        'type' => 'select',
+        'class' => 'em-rc-region',
+        'options' => $regiones,
+      ]);
+      $address["{$type}_state"]['label'] = __('Comuna', 'em-regiones-comunas');
+      $address["{$type}_state"]['description'] = '';
+
+      // País, Región y Comuna seguidos, en ese orden, donde estaba la ciudad.
+      $moved = ["{$type}_country", "{$type}_city", "{$type}_state"];
+      $ordered = [];
+      foreach ($address as $key => $field) {
+        if ($key === "{$type}_city") {
+          foreach ($moved as $movedKey) {
+            if (isset($address[$movedKey])) {
+              $ordered[$movedKey] = $address[$movedKey];
+            }
+          }
+        } elseif (!in_array($key, $moved, true)) {
+          $ordered[$key] = $field;
+        }
+      }
+      $fields[$type]['fields'] = $ordered;
+    }
+
+    return $fields;
+  }
+
+  public function admin_scripts($hook)
+  {
+    if (!in_array($hook, ['profile.php', 'user-edit.php'], true)) {
+      return;
+    }
+
+    $comunas = array_map(
+      fn ($comuna) => ['id' => (string) $comuna->id, 'comuna' => $comuna->comuna, 'region' => $comuna->region],
+      $this->get_comunas() ?: []
+    );
+
+    wp_enqueue_script(
+      'em-regiones-comunas-admin',
+      plugins_url('assets/js/em-regiones-comunas-admin.js', __FILE__),
+      ['jquery', 'wc-users'],
+      $this->asset_version('assets/js/em-regiones-comunas-admin.js'),
+      true
+    );
+    wp_add_inline_script('em-regiones-comunas-admin', 'window.emRegionesComunasAdmin = ' . wp_json_encode([
+      'comunas' => $comunas,
+      'i18n' => [
+        'selectComuna' => __('Seleccionar comuna', 'em-regiones-comunas'),
+        'selectRegionFirst' => __('Primero elige una región', 'em-regiones-comunas'),
+      ],
+    ]) . ';', 'before');
   }
 
   public function get_comunas($region_name = null)

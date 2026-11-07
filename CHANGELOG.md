@@ -5,6 +5,12 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-11-07
+
+### Añadido
+
+- En el perfil de usuario de wp-admin, las direcciones de facturación y envío muestran País, Región y Comuna seguidos. La Región es un selector y la Comuna lista solo las comunas de la región elegida; si un usuario tiene comuna sin región, la región se completa sola.
+
 ## [2.1.1] - 2026-11-07
 
 ### Corregido

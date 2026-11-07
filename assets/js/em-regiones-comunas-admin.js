@@ -1,13 +1,14 @@
 /**
- * Perfil de usuario en wp-admin (direcciones de facturación y envío).
+ * Direcciones de facturación y envío en wp-admin: perfil de usuario y editor
+ * de pedidos (crear o editar).
  *
  * Con el país en Chile, la Comuna (`*_state`) muestra solo las comunas de la
- * Región elegida (`*_city`). WooCommerce (`wc-users`) reemplaza el select de la
- * comuna cada vez que cambia el país; por eso se vuelve a filtrar después.
+ * Región elegida (`*_city`). WooCommerce (`wc-users` en el perfil,
+ * `wc-admin-order-meta-boxes` en el pedido) reemplaza el select de la comuna
+ * cada vez que cambia el país; por eso se vuelve a filtrar después.
  */
 jQuery(function ($) {
-  var data = window.emRegionesComunasAdmin || { comunas: [], i18n: {} };
-  var types = ["billing", "shipping"];
+  var data = window.emRegionesComunasAdmin || { comunas: [], addresses: [], i18n: {} };
 
   function regionOf(comunaId) {
     for (var i = 0; i < data.comunas.length; i++) {
@@ -18,10 +19,10 @@ jQuery(function ($) {
     return "";
   }
 
-  function filter(type) {
-    var $country = $("#" + type + "_country");
-    var $region = $("#" + type + "_city");
-    var $comuna = $("#" + type + "_state");
+  function filter(address) {
+    var $country = $(address.country);
+    var $region = $(address.region);
+    var $comuna = $(address.comuna);
 
     if ($country.val() !== "CL" || !$comuna.is("select")) {
       return;
@@ -54,21 +55,23 @@ jQuery(function ($) {
     $comuna.prop("disabled", !region).trigger("change.select2");
   }
 
-  $.each(types, function (i, type) {
-    var $region = $("#" + type + "_city");
+  function filterAll() {
+    $.each(data.addresses, function (i, address) {
+      filter(address);
+    });
+  }
+
+  $.each(data.addresses, function (i, address) {
+    var $region = $(address.region);
     if ($.fn.selectWoo) {
       $region.selectWoo();
     }
     $region.on("change", function () {
-      filter(type);
+      filter(address);
     });
-    filter(type);
   });
+  filterAll();
 
-  // `wc-users` crea un select nuevo para la comuna al cambiar el país.
-  $(document.body).on("country-change.woocommerce", function () {
-    $.each(types, function (i, type) {
-      filter(type);
-    });
-  });
+  // WooCommerce crea un select nuevo para la comuna al cambiar el país.
+  $(document.body).on("country-change.woocommerce", filterAll);
 });

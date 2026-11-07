@@ -4,7 +4,7 @@
  * Plugin Name: Regiones y Comunas de Chile
  * Plugin URI: https://github.com/Estudio-MOCA/em-regiones-comunas
  * Description: Comunas y regiones para WooCommerce
- * Version: 2.2.0
+ * Version: 2.3.0
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas
@@ -54,6 +54,8 @@ class Em_Regiones_Comunas
     add_action('wp_enqueue_scripts', [$this, 'scripts_css']);
     add_action('wp_head', [$this, 'wp_head']);
     add_filter('woocommerce_customer_meta_fields', [$this, 'customer_meta_fields'], 20);
+    add_filter('woocommerce_admin_billing_fields', [$this, 'admin_billing_fields'], 20, 2);
+    add_filter('woocommerce_admin_shipping_fields', [$this, 'admin_shipping_fields'], 20, 2);
     add_action('admin_enqueue_scripts', [$this, 'admin_scripts']);
     add_action('init', [$this, 'action_init'], 30);
     register_activation_hook(__FILE__, [$this, 'on_activation']);
@@ -84,7 +86,7 @@ class Em_Regiones_Comunas
   private function asset_version($path)
   {
     $file = plugin_dir_path(__FILE__) . $path;
-    return file_exists($file) ? (string) filemtime($file) : '2.2.0';
+    return file_exists($file) ? (string) filemtime($file) : '2.3.0';
   }
 
   // Páginas con formularios de dirección. En las demás (home, tienda, producto) no se carga nada:
@@ -196,49 +198,102 @@ class Em_Regiones_Comunas
    */
   public function customer_meta_fields($fields)
   {
-    $regiones = ['' => __('Seleccionar región', 'em-regiones-comunas')];
-    foreach ($this->get_regiones() ?: [] as $region) {
-      $regiones[$region->region] = $region->region;
-    }
-
     foreach (['billing', 'shipping'] as $type) {
       if (!isset($fields[$type]['fields']["{$type}_city"], $fields[$type]['fields']["{$type}_state"])) {
         continue;
       }
-      $address = $fields[$type]['fields'];
-
-      $address["{$type}_city"] = array_merge($address["{$type}_city"], [
-        'label' => __('Región', 'em-regiones-comunas'),
-        'type' => 'select',
-        'class' => 'em-rc-region',
-        'options' => $regiones,
-      ]);
-      $address["{$type}_state"]['label'] = __('Comuna', 'em-regiones-comunas');
-      $address["{$type}_state"]['description'] = '';
-
-      // País, Región y Comuna seguidos, en ese orden, donde estaba la ciudad.
-      $moved = ["{$type}_country", "{$type}_city", "{$type}_state"];
-      $ordered = [];
-      foreach ($address as $key => $field) {
-        if ($key === "{$type}_city") {
-          foreach ($moved as $movedKey) {
-            if (isset($address[$movedKey])) {
-              $ordered[$movedKey] = $address[$movedKey];
-            }
-          }
-        } elseif (!in_array($key, $moved, true)) {
-          $ordered[$key] = $field;
-        }
-      }
-      $fields[$type]['fields'] = $ordered;
+      $fields[$type]['fields'] = $this->region_comuna_fields(
+        $fields[$type]['fields'],
+        "{$type}_country",
+        "{$type}_city",
+        "{$type}_state"
+      );
     }
 
     return $fields;
   }
 
+  /**
+   * Editor de pedidos en wp-admin (crear o editar): lo mismo que en el perfil,
+   * para las direcciones de facturación y envío.
+   */
+  public function admin_billing_fields($fields, $order = false)
+  {
+    return $this->admin_order_address_fields($fields, $order, 'billing');
+  }
+
+  public function admin_shipping_fields($fields, $order = false)
+  {
+    return $this->admin_order_address_fields($fields, $order, 'shipping');
+  }
+
+  private function admin_order_address_fields($fields, $order, $type)
+  {
+    if (!isset($fields['city'], $fields['state'])) {
+      return $fields;
+    }
+
+    $current = $order instanceof WC_Order ? (string) $order->{"get_{$type}_city"}('edit') : '';
+
+    return $this->region_comuna_fields($fields, 'country', 'city', 'state', $current);
+  }
+
+  /**
+   * Región como selector, Comuna con su nombre, y País, Región y Comuna
+   * seguidos donde estaba la ciudad. `$current` es la región guardada: si no
+   * es una de la lista (dato antiguo), se agrega para no perderla al guardar.
+   */
+  private function region_comuna_fields($fields, $country_key, $city_key, $state_key, $current = '')
+  {
+    $regiones = ['' => __('Seleccionar región', 'em-regiones-comunas')];
+    foreach ($this->get_regiones() ?: [] as $region) {
+      $regiones[$region->region] = $region->region;
+    }
+    if ($current !== '' && !isset($regiones[$current])) {
+      $regiones[$current] = $current;
+    }
+
+    // `wrapper_class` solo lo usa el editor de pedidos: a media columna los
+    // nombres largos de regiones y comunas se cortan.
+    $fields[$city_key] = array_merge($fields[$city_key], [
+      'label' => __('Región', 'em-regiones-comunas'),
+      'type' => 'select',
+      'class' => 'em-rc-region select short',
+      'wrapper_class' => 'form-field-wide',
+      'options' => $regiones,
+    ]);
+    $fields[$state_key]['label'] = __('Comuna', 'em-regiones-comunas');
+    $fields[$state_key]['description'] = '';
+    $fields[$state_key]['wrapper_class'] = 'form-field-wide';
+    if (isset($fields[$country_key])) {
+      $fields[$country_key]['label'] = __('País', 'em-regiones-comunas');
+      $fields[$country_key]['wrapper_class'] = 'form-field-wide';
+    }
+
+    $moved = [$country_key, $city_key, $state_key];
+    $ordered = [];
+    foreach ($fields as $key => $field) {
+      if ($key === $city_key) {
+        foreach ($moved as $moved_key) {
+          if (isset($fields[$moved_key])) {
+            $ordered[$moved_key] = $fields[$moved_key];
+          }
+        }
+      } elseif (!in_array($key, $moved, true)) {
+        $ordered[$key] = $field;
+      }
+    }
+
+    return $ordered;
+  }
+
   public function admin_scripts($hook)
   {
-    if (!in_array($hook, ['profile.php', 'user-edit.php'], true)) {
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    $is_profile = in_array($hook, ['profile.php', 'user-edit.php'], true);
+    $is_order = $screen && function_exists('wc_get_page_screen_id') && $screen->id === wc_get_page_screen_id('shop-order');
+
+    if (!$is_profile && !$is_order) {
       return;
     }
 
@@ -247,15 +302,27 @@ class Em_Regiones_Comunas
       $this->get_comunas() ?: []
     );
 
+    // Ids de los campos: el perfil usa `billing_city`; el pedido, `_billing_city`.
+    $prefix = $is_order ? '_' : '';
+    $addresses = array_map(
+      fn ($type) => [
+        'country' => "#{$prefix}{$type}_country",
+        'region' => "#{$prefix}{$type}_city",
+        'comuna' => "#{$prefix}{$type}_state",
+      ],
+      ['billing', 'shipping']
+    );
+
     wp_enqueue_script(
       'em-regiones-comunas-admin',
       plugins_url('assets/js/em-regiones-comunas-admin.js', __FILE__),
-      ['jquery', 'wc-users'],
+      ['jquery', $is_order ? 'wc-admin-order-meta-boxes' : 'wc-users'],
       $this->asset_version('assets/js/em-regiones-comunas-admin.js'),
       true
     );
     wp_add_inline_script('em-regiones-comunas-admin', 'window.emRegionesComunasAdmin = ' . wp_json_encode([
       'comunas' => $comunas,
+      'addresses' => $addresses,
       'i18n' => [
         'selectComuna' => __('Seleccionar comuna', 'em-regiones-comunas'),
         'selectRegionFirst' => __('Primero elige una región', 'em-regiones-comunas'),

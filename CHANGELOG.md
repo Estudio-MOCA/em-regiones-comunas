@@ -5,6 +5,13 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-11-07
+
+### Añadido
+
+- Al crear o editar un pedido en wp-admin, las direcciones de facturación y envío muestran País, Región y Comuna seguidos y a todo el ancho. La Región es un selector y la Comuna lista solo las comunas de la región elegida, también al cargar la dirección del cliente o copiarla de facturación a envío.
+- Los campos de País, Región y Comuna se rotulan así en el perfil de usuario y en el pedido.
+
 ## [2.2.0] - 2026-11-07
 
 ### Añadido

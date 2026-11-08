@@ -4,7 +4,7 @@
  * Plugin Name: Regiones y Comunas de Chile
  * Plugin URI: https://github.com/Estudio-MOCA/em-regiones-comunas
  * Description: Comunas y regiones para WooCommerce
- * Version: 2.3.0
+ * Version: 2.3.1
  * Author: Estudio MOCA
  * Author URI: https://estudiomoca.cl/
  * Text Domain: em-regiones-comunas
@@ -57,6 +57,8 @@ class Em_Regiones_Comunas
     add_filter('woocommerce_admin_billing_fields', [$this, 'admin_billing_fields'], 20, 2);
     add_filter('woocommerce_admin_shipping_fields', [$this, 'admin_shipping_fields'], 20, 2);
     add_action('admin_enqueue_scripts', [$this, 'admin_scripts']);
+    add_filter('woocommerce_general_settings', [$this, 'general_settings']);
+    add_action('woocommerce_admin_field_em_single_select_country', [$this, 'render_single_select_country']);
     add_action('init', [$this, 'action_init'], 30);
     register_activation_hook(__FILE__, [$this, 'on_activation']);
   }
@@ -86,7 +88,7 @@ class Em_Regiones_Comunas
   private function asset_version($path)
   {
     $file = plugin_dir_path(__FILE__) . $path;
-    return file_exists($file) ? (string) filemtime($file) : '2.3.0';
+    return file_exists($file) ? (string) filemtime($file) : '2.3.1';
   }
 
   // Páginas con formularios de dirección. En las demás (home, tienda, producto) no se carga nada:
@@ -285,6 +287,53 @@ class Em_Regiones_Comunas
     }
 
     return $ordered;
+  }
+
+  /**
+   * "País / Provincia" de la dirección de la tienda (WooCommerce › Ajustes ›
+   * General). WooCommerce marca la opción guardada con `===` entre el estado
+   * guardado (texto, "95") y la clave del estado, que PHP convierte en entero
+   * cuando es numérica (95): con los ids de las comunas nunca coincide y el
+   * select muestra la primera opción (Afganistán) aunque se guardó "CL:95".
+   * Este tipo pinta el mismo campo comparando como texto; se guarda igual que
+   * el de WooCommerce (`wc_clean`).
+   */
+  public function general_settings($settings)
+  {
+    return array_map(
+      fn ($setting) => ($setting['type'] ?? '') === 'single_select_country'
+        ? ['type' => 'em_single_select_country'] + $setting
+        : $setting,
+      $settings
+    );
+  }
+
+  public function render_single_select_country($value)
+  {
+    [$country, $state] = array_pad(explode(':', (string) $value['value'], 2), 2, '');
+    $field = WC_Admin_Settings::get_field_description($value);
+    ?>
+    <tr class="<?php echo esc_attr($value['row_class'] ?? ''); ?>">
+      <th scope="row" class="titledesc">
+        <label for="<?php echo esc_attr($value['id']); ?>"><?php echo esc_html($value['title']); ?> <?php echo $field['tooltip_html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
+      </th>
+      <td class="forminp"><select name="<?php echo esc_attr($value['field_name'] ?? $value['id']); ?>" id="<?php echo esc_attr($value['id']); ?>" style="<?php echo esc_attr($value['css'] ?? ''); ?>" data-placeholder="<?php esc_attr_e('Choose a country / region&hellip;', 'woocommerce'); ?>" aria-label="<?php esc_attr_e('Country / Region', 'woocommerce'); ?>" class="wc-enhanced-select">
+        <?php foreach (WC()->countries->get_countries() as $code => $name) : ?>
+          <?php $states = WC()->countries->get_states($code); ?>
+          <?php if ($states) : ?>
+            <optgroup label="<?php echo esc_attr($name); ?>">
+              <?php foreach ($states as $state_code => $state_name) : ?>
+                <option value="<?php echo esc_attr("{$code}:{$state_code}"); ?>" <?php selected($code === $country && (string) $state_code === $state); ?>><?php echo esc_html("{$name} — {$state_name}"); ?></option>
+              <?php endforeach; ?>
+            </optgroup>
+          <?php else : ?>
+            <option value="<?php echo esc_attr($code); ?>" <?php selected($code === $country && $state === ''); ?>><?php echo esc_html($name); ?></option>
+          <?php endif; ?>
+        <?php endforeach; ?>
+      </select> <?php echo $field['description']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+      </td>
+    </tr>
+    <?php
   }
 
   public function admin_scripts($hook)

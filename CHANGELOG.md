@@ -5,6 +5,12 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-11-08
+
+### Corregido
+
+- En WooCommerce › Ajustes › General, "País / Provincia" de la dirección de la tienda volvía a mostrar Afganistán al elegir una comuna de Chile. Se guardaba bien, pero WooCommerce no marcaba la opción porque compara el id numérico de la comuna con el texto guardado.
+
 ## [2.3.0] - 2026-11-07
 
 ### Añadido
